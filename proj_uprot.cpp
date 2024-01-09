@@ -6,10 +6,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <termios.h>
 #include <unistd.h>
 #include <queue>
 #include <pthread.h>
+#include <termios.h>
 #include "proj_uport.hpp"
 
 void* UPORT_GET(void * ptr);

@@ -6,8 +6,6 @@ typedef struct{
     char Data[UPROT_RX_DATA];
     unsigned long int dataLens;
 }transData;
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
