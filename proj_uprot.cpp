@@ -10,6 +10,7 @@
 #include <queue>
 #include <pthread.h>
 #include <termios.h>
+#include <atomic>
 #include "proj_uport.hpp"
 
 void* UPORT_GET(void * ptr);
@@ -103,7 +104,7 @@ public:
     std::queue<transData> uz_rxdata_queue;
     pthread_mutex_t uz_rx_mutex;
     pthread_cond_t uz_rx_cond;
-    bool ExitSignel=false;
+    std::atomic<bool> ExitSignel;
 
 private:
     int uPort;

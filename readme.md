@@ -21,6 +21,13 @@ void uz_sendData(int handle,transData * input);
 //handle为已经初始化好的串口handle,transData 为结构体，声明在proj_uport.hpp内，调用后接受数据返回在transData内。
 void uz_getData(int handle,transData * input);
 ```
+## 反初始化串口收发（关闭设备，清除内存，回收线程）
+```c
+//handle为已经初始化好的串口handle，函数执行回收操作。
+//在程序退出前，由于类的析构函数会自动调用，不用担心程序退出后的回收问题
+//该函数用于主动管理系统资源。
+void uz_deInitialUportDevice(int handle);
+```
 ## 传输结构
 ```c
 typedef struct{
