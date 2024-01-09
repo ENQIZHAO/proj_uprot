@@ -9,3 +9,6 @@ SOURCES += \
 
 HEADERS += \
     proj_uport.hpp
+
+DISTFILES += \
+    readme.md

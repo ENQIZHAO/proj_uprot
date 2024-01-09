@@ -17,9 +17,9 @@ void* UPORT_SEND(void * ptr);
 
 class uportDev{
 public:
-    uportDev()
+    uportDev(const char * devicePath)
     {
-        uPort=open(UPROT_DEVICE_PATH,O_RDWR | O_NOCTTY | O_NDELAY);
+        uPort=open(devicePath,O_RDWR | O_NOCTTY | O_NDELAY);
         if(uPort < 0){
             printf("%s open faild\r\n",UPROT_DEVICE_PATH);
         }
@@ -44,6 +44,8 @@ public:
     {
         threadStart = true;
         ExitSignel =false;
+
+
         pthread_create(&rxThread,NULL,UPORT_GET,this);
         pthread_create(&txThread,NULL,UPORT_SEND,this);
     }
@@ -117,7 +119,17 @@ std::vector<uportDev> uz_uPortDevice;
 
 void* UPORT_GET(void * ptr)
 {
+    if(ptr==nullptr)
+    {
+        return nullptr;
+    }
+
     uportDev * objectPtr =(uportDev *)ptr;
+    if(objectPtr->getUportHandle()<0)
+    {
+        return nullptr;
+    }
+
     int len=0;
 
     transData tempRx;
@@ -134,6 +146,7 @@ void* UPORT_GET(void * ptr)
         if(fs_sel)
         {
             len =read(objectPtr->getUportHandle(),tempRx.Data,UPROT_RX_DATA);
+            tempRx.dataLens=len;
             if(len>0)
             {
                 pthread_mutex_lock(&objectPtr->uz_rx_mutex);
@@ -155,33 +168,55 @@ void* UPORT_GET(void * ptr)
 }
 void* UPORT_SEND(void * ptr)
 {
-    transData tempTx;
+
+    if(ptr==nullptr)
+    {
+        return nullptr;
+    }
+
     uportDev * objectPtr =(uportDev *)ptr;
+    if(objectPtr->getUportHandle()<0)
+    {
+        return nullptr;
+    }
+    transData tempTx;
     while (!objectPtr->ExitSignel) {
         pthread_mutex_lock(&objectPtr->uz_tx_mutex);
 
         // 判断队列是否为空
-        while (objectPtr->uz_txdata_queue.empty()) {
+        while (objectPtr->uz_txdata_queue.empty()&&!objectPtr->ExitSignel) {
             // 等待信号
             pthread_cond_wait(&objectPtr->uz_tx_cond, &objectPtr->uz_tx_mutex);
         }
 
-        // 从队列中取出数据
-        tempTx = objectPtr->uz_txdata_queue.front();
-        objectPtr->uz_txdata_queue.pop();
+        if(!objectPtr->ExitSignel)
+        {
+            // 从队列中取出数据
+            tempTx = objectPtr->uz_txdata_queue.front();
+            objectPtr->uz_txdata_queue.pop();
+            // 解锁
+            pthread_mutex_unlock(&objectPtr->uz_tx_mutex);
+            //将txData内的数据写入
+            write(objectPtr->getUportHandle(),tempTx.Data,tempTx.dataLens);
+        }
+        else
+        {
+            //退出前清空队列
+            while (!objectPtr->uz_txdata_queue.empty()) {
+                objectPtr->uz_txdata_queue.pop();
+            }
+            // 解锁
+            pthread_mutex_unlock(&objectPtr->uz_tx_mutex);
+        }
 
-        // 解锁
-        pthread_mutex_unlock(&objectPtr->uz_tx_mutex);
-        //将txData内的数据写入
-        write(objectPtr->getUportHandle(),tempTx.Data,sizeof(tempTx.Data)-1);
     }
     return NULL;
 }
 
 
-unsigned int uz_initialAUportDevice()
+unsigned int uz_initialAUportDevice(const char * devicePath)
 {
-    uz_uPortDevice.push_back(uportDev());
+    uz_uPortDevice.push_back(uportDev(devicePath));
     return uz_uPortDevice[uz_uPortDevice.size()-1].getUportHandle();
 }
 void uz_deInitialUportDevice(int handle)
