@@ -35,3 +35,30 @@ typedef struct{
     unsigned long int dataLens; //有效数据长度
 }transData;
 ```
+# 默认串口配置
+## 默认串口配置如下
+```c
+struct termios ter_s;
+ter_s.c_iflag &= ~(INLCR | ICRNL | IGNCR);//禁用串口在接受数据时linux和windows之间的回车换行转换操作。
+ter_s.c_cflag |= CLOCAL | CREAD;//激活本地连接与接受使能
+ter_s.c_cflag &= ~CSIZE;//失能数据位屏蔽
+ter_s.c_cflag |= CS8;//8位数据
+ter_s.c_cflag &= ~CSTOPB;//1位停止位
+ter_s.c_cflag &= ~PARENB;//无校验位
+ter_s.c_cc[VTIME] = 1;//设置接受收等待超时时间 0.1s
+ter_s.c_cc[VMIN] = 0;//设置期望一次接收字节数量
+ter_s.c_oflag &= ~OPOST; //禁止串口对输出做处理，将发送数据原样输出。
+cfsetispeed(&ter_s,B115200);//设置输入波特率115200
+cfsetospeed(&ter_s,B115200);//设置输出波特率115200
+```
+## 如果需要自定义，可以在initial之后使用handle自行设置
+```c
+int uPort = uz_initialAUportDevice("device's Path");
+struct termios ter_s;
+//自定义....
+if(tcsetattr(uPort ,TCSANOW,&ter_s) != 0)
+{
+    error("com set error!\r\n");
+}
+```
+
