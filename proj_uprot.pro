@@ -12,3 +12,6 @@ HEADERS += \
 
 DISTFILES += \
     readme.md
+
+LIBS +=\
+"-lpthread"\

@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <queue>
 #include <pthread.h>
+#include <map>
 #include <termios.h>
 #include <atomic>
 #include "proj_uport.hpp"
@@ -18,6 +19,10 @@ void* UPORT_SEND(void * ptr);
 
 class uportDev{
 public:
+    uportDev()
+    {
+        uPort=-1;
+    }
     uportDev(const char * devicePath)
     {
         uPort=open(devicePath,O_RDWR | O_NOCTTY | O_NDELAY);
@@ -113,7 +118,7 @@ private:
     pthread_t rxThread,txThread;
 };
 std::vector<uportDev> uz_uPortDevice;
-
+//std::map<std::string,uportDev> uz_uPortDevices;
 
 
 
@@ -198,6 +203,7 @@ void* UPORT_SEND(void * ptr)
             // 解锁
             pthread_mutex_unlock(&objectPtr->uz_tx_mutex);
             //将txData内的数据写入
+            printf("signel \n");
             write(objectPtr->getUportHandle(),tempTx.Data,tempTx.dataLens);
         }
         else
