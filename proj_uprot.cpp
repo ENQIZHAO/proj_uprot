@@ -319,6 +319,7 @@ void* UPORT_SEND(void * ptr)
 
 unsigned int uz_initialAUportDevice(const char * devicePath)
 {
+    uz_uPortDevices.emplace(devicePath,uportDev());
     uportDev * ptr = &uz_uPortDevices[devicePath];
     ptr->openDev(devicePath);
     return ptr->getUportHandle();
