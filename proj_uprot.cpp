@@ -19,10 +19,6 @@ void* UPORT_SEND(void * ptr);
 
 class uportDev{
 public:
-    uportDev()
-    {
-        uPort=-1;
-    }
     uportDev(const char * devicePath)
     {
         uPort=open(devicePath,O_RDWR | O_NOCTTY | O_NDELAY);
@@ -118,10 +114,6 @@ private:
     pthread_t rxThread,txThread;
 };
 std::vector<uportDev> uz_uPortDevice;
-//std::map<std::string,uportDev> uz_uPortDevices;
-
-
-
 
 void* UPORT_GET(void * ptr)
 {
