@@ -8,25 +8,25 @@ unsigned int uz_initialAUportDevice(const char * devicePath);
 ```
 ## 开始后台收发服务
 ```c
-//handle为已经初始化好的串口handle，要想正常使用uz_sendData和uz_getData，必须先调用此函数
-void uz_startTrans(int handle);
+//设备路径devicePath，要想正常使用uz_sendData和uz_getData，必须先调用此函数
+void uz_startTrans(const char * devicePath);
 ```
 ## 发送一组数据
 ```c
-//handle为已经初始化好的串口handle,transData 为结构体，声明在proj_uport.hpp内，存储要发送的数据
-void uz_sendData(int handle,transData * input);
+//设备路径devicePath,transData 为结构体，声明在proj_uport.hpp内，存储要发送的数据
+void uz_sendData(const char * devicePath,transData * input);
 ```
 ## 接收一组数据（注意为阻塞等待）
 ```c
-//handle为已经初始化好的串口handle,transData 为结构体，声明在proj_uport.hpp内，调用后接受数据返回在transData内。
-void uz_getData(int handle,transData * input);
+//设备路径devicePath,transData 为结构体，声明在proj_uport.hpp内，调用后接受数据返回在transData内。
+void uz_getData(const char * devicePath,transData * input);
 ```
 ## 反初始化串口收发（关闭设备，清除内存，回收线程）
 ```c
-//handle为已经初始化好的串口handle，函数执行回收操作。
+//设备路径devicePath，函数执行回收操作。
 //在程序退出前，由于类的析构函数会自动调用，不用担心程序退出后的回收问题
 //该函数用于主动管理系统资源。
-void uz_deInitialUportDevice(int handle);
+void uz_deInitialUportDevice(const char * devicePath);
 ```
 ## 传输结构
 ```c
@@ -51,14 +51,11 @@ ter_s.c_oflag &= ~OPOST; //禁止串口对输出做处理，将发送数据原�
 cfsetispeed(&ter_s,B115200);//设置输入波特率115200
 cfsetospeed(&ter_s,B115200);//设置输出波特率115200
 ```
-## 如果需要自定义，可以在initial之后使用handle自行设置
+## 如果需要自定义，可以在initial之后使用uz_setPortArg自行设置
 ```c
-int uPort = uz_initialAUportDevice("device's Path");
+uz_initialAUportDevice("device's Path");
 struct termios ter_s;
 //自定义....
-if(tcsetattr(uPort ,TCSANOW,&ter_s) != 0)
-{
-    error("com set error!\r\n");
-}
+uz_setPortArg("device's Path",ter_s.iflag,ter_s.cflag,ter_s.oflag,BITRATE115200)
 ```
 
