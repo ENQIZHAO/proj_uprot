@@ -44,11 +44,11 @@ public:
     void initialTrans()
     {
         threadStart = true;
-        ExitSignel =false;
+        ExitSignel = false;
 
 
-        pthread_create(&rxThread,NULL,UPORT_GET,this);
-        pthread_create(&txThread,NULL,UPORT_SEND,this);
+        pthread_create(&rxThread,nullptr,UPORT_GET,this);
+        pthread_create(&txThread,nullptr,UPORT_SEND,this);
     }
 
     ~uportDev()
@@ -104,7 +104,7 @@ public:
     std::queue<transData> uz_rxdata_queue;
     pthread_mutex_t uz_rx_mutex;
     pthread_cond_t uz_rx_cond;
-    std::atomic<bool> ExitSignel;
+    bool ExitSignel;
 
 private:
     int uPort;
@@ -143,7 +143,7 @@ void* UPORT_GET(void * ptr)
         FD_SET(objectPtr->getUportHandle(),&fs_read);
         time.tv_sec=0;
         time.tv_usec=300000;
-        fs_sel=select(objectPtr->getUportHandle()+1,&fs_read,NULL,NULL,&time);
+        fs_sel=select(objectPtr->getUportHandle()+1,&fs_read,nullptr,nullptr,&time);
         if(fs_sel)
         {
             len =read(objectPtr->getUportHandle(),tempRx.Data,UPROT_RX_DATA);
@@ -165,7 +165,7 @@ void* UPORT_GET(void * ptr)
         }
 
     }
-    return NULL;
+    return nullptr;
 }
 void* UPORT_SEND(void * ptr)
 {
@@ -211,7 +211,7 @@ void* UPORT_SEND(void * ptr)
         }
 
     }
-    return NULL;
+    return nullptr;
 }
 
 
